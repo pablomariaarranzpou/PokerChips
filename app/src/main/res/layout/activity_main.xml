@@ -12,28 +12,24 @@
 
     <Button
         android:id="@+id/create_menu"
-        android:layout_width="173dp"
-        android:layout_height="45dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_width="172dp"
+        android:layout_height="67dp"
         android:text="Crear Sala"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.505"
+        app:layout_constraintHorizontal_bias="0.499"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/join_menu"
-        app:layout_constraintVertical_bias="0.032" />
+        app:layout_constraintTop_toBottomOf="@+id/join_menu" />
 
     <Button
         android:id="@+id/join_menu"
         android:layout_width="173dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="12dp"
         android:text="Unirse a sala"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextRoom" />
-
 
     <com.google.android.material.textfield.TextInputLayout
 
@@ -60,6 +56,7 @@
 
         android:layout_width="173dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:textColorHint="#FFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -78,7 +75,6 @@
         android:id="@+id/imageView3"
         android:layout_width="414dp"
         android:layout_height="108dp"
-        android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.493"
         app:layout_constraintStart_toStartOf="parent"
