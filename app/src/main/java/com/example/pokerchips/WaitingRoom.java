@@ -6,14 +6,26 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.MetadataChanges;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -33,15 +45,18 @@ public class WaitingRoom extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private PlayersViewModel playersViewModel;
     private String roomID;
+    private Button btn_empezarpartida;
+    private FirebaseFirestore firestore;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        firestore = FirebaseFirestore.getInstance();
         setContentView(R.layout.activity_waiting);
         textoEsperando = findViewById(R.id.textoEsperando);
         loadingView = findViewById(R.id.loading_spinner);
         shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         mRecyclerView = findViewById(R.id.recyclerView);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 1));
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         if (getIntent().hasExtra("roomID")){
             this.roomID = getIntent().getExtras().getString("roomID");
             Log.d("ROOM", roomID);
@@ -70,9 +85,22 @@ public class WaitingRoom extends AppCompatActivity {
             }
         };
 
+        firestore.collection("Room").document(roomID).collection("Player").addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                Log.d("cambios", "HAY CAMBIOS");
+                setLiveDataObservers();
+
+            }
+        });
+
+
+
 
         playersViewModel.getPlayersCards().observe(this, observer);
         playersViewModel.getToast().observe(this, observerToast);
 
+
     }
+
 }
