@@ -17,8 +17,8 @@ public class PlayersViewHolder extends RecyclerView.ViewHolder{
 
     public PlayersViewHolder(@NonNull View itemView) {
         super(itemView);
-        user_name = (TextView) itemView.findViewById(R.id.user_name);
-        user_chips = (TextView) itemView.findViewById(R.id.user_chips);
+        user_name = (TextView) itemView.findViewById(R.id.user_name_item);
+        user_chips = (TextView) itemView.findViewById(R.id.user_chips_item);
     }
 
     public TextView getuser_name() {

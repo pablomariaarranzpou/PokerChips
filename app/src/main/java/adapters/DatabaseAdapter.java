@@ -64,7 +64,8 @@ public class DatabaseAdapter extends Activity {
 
 
     public void getRoomPlayers(String roomID){
-        DatabaseAdapter.db.collection("Curso").document(roomID)
+        Log.d("LLEGA", "LLEGA A METODO");
+        DatabaseAdapter.db.collection("Room").document(roomID)
                 .collection("Player").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override

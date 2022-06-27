@@ -38,7 +38,7 @@ public class PlayersAdapter extends RecyclerView.Adapter<PlayersViewHolder>{
                 localDataSet.get(position).getUsername());
 
         holder.getuser_chips().setText(
-                localDataSet.get(position).getUserChips());
+                localDataSet.get(position).getUserChipstoString());
 
 
     }

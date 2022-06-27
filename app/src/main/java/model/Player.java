@@ -14,15 +14,13 @@ public class Player {
         return username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
     public int getUserChips() {
         return userChips;
     }
 
-    public void setUserChips(int userChips) {
-        this.userChips = userChips;
+    public String getUserChipstoString() {
+        return String.valueOf(userChips);
     }
+
 }

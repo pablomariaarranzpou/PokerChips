@@ -43,7 +43,6 @@ public class WaitingRoom extends AppCompatActivity {
         mRecyclerView = findViewById(R.id.recyclerView);
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, 1));
         if (getIntent().hasExtra("roomID")){
-
             this.roomID = getIntent().getExtras().getString("roomID");
             Log.d("ROOM", roomID);
             setLiveDataObservers();
