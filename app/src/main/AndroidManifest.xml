@@ -21,6 +21,8 @@
         </activity>
         <activity android:name=".CreateRoom"
             android:screenOrientation="landscape"/>
+        <activity android:name=".WaitingRoom"
+            android:screenOrientation="landscape"/>
 
     </application>
 
