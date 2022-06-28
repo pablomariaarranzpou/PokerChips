@@ -12,6 +12,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -25,16 +26,19 @@ public class MainActivity extends AppCompatActivity {
     Button btn_createRoom, btn_joinRoom;
     TextInputEditText user_name, room_code;
     FirebaseFirestore firestore;
+    FirebaseAuth mAuth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         firestore = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
         btn_createRoom = findViewById(R.id.create_menu);
         btn_joinRoom = findViewById(R.id.join_menu);
         user_name = findViewById(R.id.edituser);
         room_code = findViewById(R.id.editroom);
         btn_createRoom.setOnClickListener(v-> startActivity(new Intent(MainActivity.this, CreateRoom.class)));
+
 
         btn_joinRoom.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
                                         Intent in = new Intent(MainActivity.this, WaitingRoom.class);
                                         in.putExtra("roomID", doc.getId());
                                         Map<String, Object> user_new = new HashMap<>();
+                                        user_new.put("player_id", mAuth.getCurrentUser());
                                         user_new.put("player_name", user);
                                         user_new.put("player_chips",Math.toIntExact(document.getLong("numChips")));
                                         doc.collection("Player").add(user_new).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {

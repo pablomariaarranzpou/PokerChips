@@ -40,7 +40,7 @@ import model.Player;
 
 public class WaitingRoom extends AppCompatActivity {
 
-    private TextView textoEsperando, playersIn;
+    private TextView textoEsperando, playersIn, code_txt;
     private ProgressBar loadingView;
     private int shortAnimationDuration;
     private Context parentContext;
@@ -60,6 +60,7 @@ public class WaitingRoom extends AppCompatActivity {
         mApplication = this;
         textoEsperando = findViewById(R.id.textoEsperando);
         loadingView = findViewById(R.id.loading_spinner);
+        code_txt = findViewById(R.id.codigotxt);
         shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         mRecyclerView = findViewById(R.id.recyclerView);
         playersIn = findViewById(R.id.playersIn);
@@ -67,6 +68,7 @@ public class WaitingRoom extends AppCompatActivity {
         if (getIntent().hasExtra("roomID")){
             this.roomID = getIntent().getExtras().getString("roomID");
             Log.d("ROOM", roomID);
+            code_txt.setText(roomID);
             setLiveDataObservers();
         }
 

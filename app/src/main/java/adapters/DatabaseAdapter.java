@@ -79,7 +79,7 @@ public class DatabaseAdapter extends Activity {
                         for (DocumentSnapshot document : value.getDocuments()) {
                             if (document.exists()) {
                                 Log.d("PLAYER", document.getData().toString());
-                                acc.add(new Player(document.getString("player_name"), Math.toIntExact(document.getLong("player_chips"))));
+                                acc.add(new Player(document.getString("player_name"), Math.toIntExact(document.getLong("player_chips")), document.getString("player_id")));
                             }
                         }
                         listener.setCollection(acc);
