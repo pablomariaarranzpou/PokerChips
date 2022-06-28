@@ -34,7 +34,7 @@
     <com.google.android.material.textfield.TextInputLayout
 
         android:id="@+id/editTextUsernName"
-        android:layout_width="173dp"
+        android:layout_width="255dp"
         android:layout_height="wrap_content"
         android:textColorHint="#FFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
@@ -55,7 +55,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/editTextRoom"
 
-        android:layout_width="173dp"
+        android:layout_width="255dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:textColorHint="#FFFFFF"

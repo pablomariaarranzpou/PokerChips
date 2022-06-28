@@ -40,7 +40,7 @@ import model.Player;
 
 public class WaitingRoom extends AppCompatActivity {
 
-    private TextView textoEsperando;
+    private TextView textoEsperando, playersIn;
     private ProgressBar loadingView;
     private int shortAnimationDuration;
     private Context parentContext;
@@ -52,6 +52,7 @@ public class WaitingRoom extends AppCompatActivity {
     private Button btn_empezarpartida;
     private FirebaseFirestore firestore;
 
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         firestore = FirebaseFirestore.getInstance();
@@ -61,12 +62,15 @@ public class WaitingRoom extends AppCompatActivity {
         loadingView = findViewById(R.id.loading_spinner);
         shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         mRecyclerView = findViewById(R.id.recyclerView);
+        playersIn = findViewById(R.id.playersIn);
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         if (getIntent().hasExtra("roomID")){
             this.roomID = getIntent().getExtras().getString("roomID");
             Log.d("ROOM", roomID);
             setLiveDataObservers();
         }
+
+
 
     }
 
@@ -78,6 +82,7 @@ public class WaitingRoom extends AppCompatActivity {
             @Override
             public void onChanged(ArrayList<Player> ac) {
                 Log.d("CHANGEE", ac.toString());
+                playersIn.setText(String.valueOf(ac.size()) + " Jugadores");
                 PlayersAdapter newAdapter = new PlayersAdapter(parentContext, ac);
                 mRecyclerView.swapAdapter(newAdapter, false);
                 newAdapter.notifyDataSetChanged();
@@ -93,8 +98,6 @@ public class WaitingRoom extends AppCompatActivity {
 
         playersViewModel.getPlayersCards().observe(this, observer);
         playersViewModel.getToast().observe(this, observerToast);
-
-
 
 
     }

@@ -53,24 +53,34 @@ public class MainActivity extends AppCompatActivity {
                 }else{
                     DocumentReference doc = firestore.collection("Room").document(room);
 
+
                     doc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                             if (task.isSuccessful()) {
                                 DocumentSnapshot document = task.getResult();
                                 if (document.exists()) {
-                                    Intent in = new Intent(MainActivity.this, WaitingRoom.class);
-                                    in.putExtra("roomID", doc.getId());
-                                    Map<String, Object> user_new = new HashMap<>();
-                                    user_new.put("player_name", user);
-                                    user_new.put("player_chips", 999);
-                                    doc.collection("Player").add(user_new).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                        @Override
-                                        public void onSuccess(DocumentReference documentReference) {
-                                            startActivity(in);
-                                            finish();
-                                        }
+                                    int inPlayers = Math.toIntExact(document.getLong("inPlayers"));
+                                    ++inPlayers;
+                                    if(inPlayers > Math.toIntExact(document.getLong("numPlayers"))){
+                                        room_code.setError("SALA LLENA");
+                                        room_code.requestFocus();
+                                        return;
+                                    } doc.update("inPlayers", inPlayers).addOnSuccessListener((OnSuccessListener<? super Void>) task1 -> {
+                                        Intent in = new Intent(MainActivity.this, WaitingRoom.class);
+                                        in.putExtra("roomID", doc.getId());
+                                        Map<String, Object> user_new = new HashMap<>();
+                                        user_new.put("player_name", user);
+                                        user_new.put("player_chips",Math.toIntExact(document.getLong("numChips")));
+                                        doc.collection("Player").add(user_new).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                            @Override
+                                            public void onSuccess(DocumentReference documentReference) {
+                                                startActivity(in);
+                                                finish();
+                                            }
+                                        });
                                     });
+
                                 } else {
                                     room_code.setError("NO EXISTE");
                                     room_code.requestFocus();
