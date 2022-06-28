@@ -16,7 +16,7 @@ public class PlayersViewModel extends AndroidViewModel implements DatabaseAdapte
     private final MutableLiveData<String> mToast;
     private final Application mAplicattion;
 
-    public PlayersViewModel(@NonNull Application application, String roomID) {
+    public PlayersViewModel(Application application, String roomID) {
         super(application);
         mPlayers = new MutableLiveData<>();
         mToast = new MutableLiveData<>();

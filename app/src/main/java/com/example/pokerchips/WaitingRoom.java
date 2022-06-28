@@ -1,5 +1,7 @@
 package com.example.pokerchips;
 
+import android.annotation.SuppressLint;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -45,6 +48,7 @@ public class WaitingRoom extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private PlayersViewModel playersViewModel;
     private String roomID;
+    private WaitingRoom mApplication;
     private Button btn_empezarpartida;
     private FirebaseFirestore firestore;
 
@@ -52,6 +56,7 @@ public class WaitingRoom extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         firestore = FirebaseFirestore.getInstance();
         setContentView(R.layout.activity_waiting);
+        mApplication = this;
         textoEsperando = findViewById(R.id.textoEsperando);
         loadingView = findViewById(R.id.loading_spinner);
         shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
@@ -72,6 +77,7 @@ public class WaitingRoom extends AppCompatActivity {
         final Observer<ArrayList<Player>> observer = new Observer<ArrayList<Player>>() {
             @Override
             public void onChanged(ArrayList<Player> ac) {
+                Log.d("CHANGEE", ac.toString());
                 PlayersAdapter newAdapter = new PlayersAdapter(parentContext, ac);
                 mRecyclerView.swapAdapter(newAdapter, false);
                 newAdapter.notifyDataSetChanged();
@@ -85,20 +91,10 @@ public class WaitingRoom extends AppCompatActivity {
             }
         };
 
-        firestore.collection("Room").document(roomID).collection("Player").addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                Log.d("cambios", "HAY CAMBIOS");
-                setLiveDataObservers();
-
-            }
-        });
-
-
-
-
         playersViewModel.getPlayersCards().observe(this, observer);
         playersViewModel.getToast().observe(this, observerToast);
+
+
 
 
     }

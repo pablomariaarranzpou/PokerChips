@@ -1,16 +1,22 @@
 package adapters;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -61,29 +67,26 @@ public class DatabaseAdapter extends Activity {
                         }
                     });
     }
-
-
     public void getRoomPlayers(String roomID){
         Log.d("LLEGA", "LLEGA A METODO");
-        DatabaseAdapter.db.collection("Room").document(roomID)
-                .collection("Player").get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        db.collection("Room").document(roomID).collection("Player")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @SuppressLint("NotifyDataSetChanged")
                     @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) { ;
-                            ArrayList<Player> acc = new ArrayList<Player>();
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                if (document.exists()) {
-                                    Log.d("PLAYER", document.getData().toString());
-                                    acc.add(new Player(document.getString("player_name"), Math.toIntExact(document.getLong("player_chips"))));
-                                }
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                        Log.d("cambios", "HAY CAMBIOS");
+                        ArrayList<Player> acc = new ArrayList<Player>();
+                        for (DocumentSnapshot document : value.getDocuments()) {
+                            if (document.exists()) {
+                                Log.d("PLAYER", document.getData().toString());
+                                acc.add(new Player(document.getString("player_name"), Math.toIntExact(document.getLong("player_chips"))));
                             }
-                            listener.setCollection(acc);
-
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
                         }
+                        listener.setCollection(acc);
+
                     }
                 });
+
+
     }
 }
