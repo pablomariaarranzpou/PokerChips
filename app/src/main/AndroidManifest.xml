@@ -23,6 +23,8 @@
             android:screenOrientation="landscape"/>
         <activity android:name=".WaitingRoom"
             android:screenOrientation="landscape"/>
+        <activity android:name=".Game"
+            android:screenOrientation="landscape"/>
 
     </application>
 

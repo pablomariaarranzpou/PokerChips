@@ -2,6 +2,7 @@ package com.example.pokerchips;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -74,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
                                         Intent in = new Intent(MainActivity.this, WaitingRoom.class);
                                         in.putExtra("roomID", doc.getId());
                                         Map<String, Object> user_new = new HashMap<>();
-                                        user_new.put("player_id", mAuth.getCurrentUser());
+                                        user_new.put("player_id", mAuth.getCurrentUser().getUid());
                                         user_new.put("player_name", user);
                                         user_new.put("player_chips",Math.toIntExact(document.getLong("numChips")));
                                         doc.collection("Player").add(user_new).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {

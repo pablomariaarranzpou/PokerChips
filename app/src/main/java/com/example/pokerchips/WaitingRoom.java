@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -64,6 +65,7 @@ public class WaitingRoom extends AppCompatActivity {
         shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         mRecyclerView = findViewById(R.id.recyclerView);
         playersIn = findViewById(R.id.playersIn);
+        btn_empezarpartida = findViewById(R.id.btn_startgame);
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         if (getIntent().hasExtra("roomID")){
             this.roomID = getIntent().getExtras().getString("roomID");
@@ -72,7 +74,7 @@ public class WaitingRoom extends AppCompatActivity {
             setLiveDataObservers();
         }
 
-
+        btn_empezarpartida = findViewById(R.id.btn_startgame);
 
     }
 
@@ -100,6 +102,17 @@ public class WaitingRoom extends AppCompatActivity {
 
         playersViewModel.getPlayersCards().observe(this, observer);
         playersViewModel.getToast().observe(this, observerToast);
+
+        btn_empezarpartida.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent in = new Intent(WaitingRoom.this, Game.class);
+                in.putExtra("roomID", roomID);
+                startActivity(in);
+                finish();
+            }
+        });
 
 
     }
