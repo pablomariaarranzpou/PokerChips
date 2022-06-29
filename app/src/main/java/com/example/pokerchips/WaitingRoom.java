@@ -4,7 +4,9 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.opengl.Visibility;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -21,6 +23,7 @@ import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -30,8 +33,10 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.MetadataChanges;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import adapters.PlayersAdapter;
 import adapters.PlayersViewHolder;
@@ -48,21 +53,23 @@ public class WaitingRoom extends AppCompatActivity {
     private AppCompatActivity mActivity;
     private RecyclerView mRecyclerView;
     private PlayersViewModel playersViewModel;
-    private String roomID;
+    private String roomID, gameID;
     private WaitingRoom mApplication;
     private Button btn_empezarpartida;
     private FirebaseFirestore firestore;
+    private boolean empezando;
+    private int cambios = 0;
 
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         firestore = FirebaseFirestore.getInstance();
         setContentView(R.layout.activity_waiting);
+        empezando = true;
         mApplication = this;
         textoEsperando = findViewById(R.id.textoEsperando);
         loadingView = findViewById(R.id.loading_spinner);
         code_txt = findViewById(R.id.codigotxt);
-        shortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         mRecyclerView = findViewById(R.id.recyclerView);
         playersIn = findViewById(R.id.playersIn);
         btn_empezarpartida = findViewById(R.id.btn_startgame);
@@ -70,6 +77,9 @@ public class WaitingRoom extends AppCompatActivity {
         if (getIntent().hasExtra("roomID")){
             this.roomID = getIntent().getExtras().getString("roomID");
             Log.d("ROOM", roomID);
+            if (getIntent().hasExtra("gameID")){
+                this.gameID = getIntent().getExtras().getString("gameID");
+            }
             code_txt.setText(roomID);
             setLiveDataObservers();
         }
@@ -103,18 +113,36 @@ public class WaitingRoom extends AppCompatActivity {
         playersViewModel.getPlayersCards().observe(this, observer);
         playersViewModel.getToast().observe(this, observerToast);
 
-        btn_empezarpartida.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                Intent in = new Intent(WaitingRoom.this, Game.class);
-                in.putExtra("roomID", roomID);
-                startActivity(in);
-                finish();
+
+        firestore.collection("Game").document(gameID).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                firestore.collection("Room").document(roomID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        if(documentSnapshot.getLong("inPlayers") == documentSnapshot.getLong("numPlayers")){
+                            Intent in = new Intent(WaitingRoom.this, Game.class);
+                            loadingView.setVisibility(View.GONE);
+                            textoEsperando.setText("Starting...");
+                            in.putExtra("roomID", roomID);
+                            in.putExtra("gameID", gameID);
+                            try {
+                                Thread.sleep(5000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            startActivity(in);
+                            finish();
+                        }
+                    }
+                });
             }
+
         });
 
 
     }
+
 
 }

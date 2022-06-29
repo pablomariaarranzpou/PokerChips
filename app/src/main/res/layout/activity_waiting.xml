@@ -111,4 +111,5 @@
         app:layout_constraintBottom_toTopOf="@+id/playersIn"
         app:layout_constraintStart_toEndOf="@+id/loading_spinner"
         app:layout_constraintTop_toBottomOf="@+id/textoEsperando" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

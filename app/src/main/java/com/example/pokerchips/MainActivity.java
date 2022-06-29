@@ -74,17 +74,25 @@ public class MainActivity extends AppCompatActivity {
                                     } doc.update("inPlayers", inPlayers).addOnSuccessListener((OnSuccessListener<? super Void>) task1 -> {
                                         Intent in = new Intent(MainActivity.this, WaitingRoom.class);
                                         in.putExtra("roomID", doc.getId());
-                                        Map<String, Object> user_new = new HashMap<>();
-                                        user_new.put("player_id", mAuth.getCurrentUser().getUid());
-                                        user_new.put("player_name", user);
-                                        user_new.put("player_chips",Math.toIntExact(document.getLong("numChips")));
-                                        doc.collection("Player").add(user_new).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                        doc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                             @Override
-                                            public void onSuccess(DocumentReference documentReference) {
-                                                startActivity(in);
-                                                finish();
+                                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                in.putExtra("gameID", documentSnapshot.getString("gameID"));
+                                                Map<String, Object> user_new = new HashMap<>();
+                                                user_new.put("player_id", mAuth.getCurrentUser().getUid());
+                                                user_new.put("player_name", user);
+                                                user_new.put("player_chips",Math.toIntExact(document.getLong("numChips")));
+                                                user_new.put("user_creator", false);
+                                                doc.collection("Player").add(user_new).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                    @Override
+                                                    public void onSuccess(DocumentReference documentReference) {
+                                                        startActivity(in);
+                                                        finish();
+                                                    }
+                                                });
                                             }
                                         });
+
                                     });
 
                                 } else {

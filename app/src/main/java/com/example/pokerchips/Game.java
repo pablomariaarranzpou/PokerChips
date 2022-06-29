@@ -23,7 +23,7 @@ public class Game extends AppCompatActivity {
 
     private FirebaseFirestore firestore;
     private FirebaseAuth mAuth;
-    private String userID, roomID;
+    private String userID, roomID, gameID;
     private TextView seat1, seat2, seat3, seat4, seat5, seat6, seat7, seat8;
     private TextView chips1, chips2, chips3, chips4, chips5, chips6, chips7, chips8;
     private ArrayList<Player> playersList;
@@ -39,14 +39,17 @@ public class Game extends AppCompatActivity {
         userID = mAuth.getCurrentUser().getUid();
         seatsViews = new ArrayList<TextView>();
         chipsView = new ArrayList<TextView>();
+        userID = mAuth.getCurrentUser().getUid();
 
-        if (getIntent().hasExtra("roomID")){
+
+        if (getIntent().hasExtra("roomID") && getIntent().hasExtra("gameID")){
             this.roomID = getIntent().getExtras().getString("roomID");
+            this.gameID = getIntent().getExtras().getString("gameID");
+            firestore.collection("Game").document(gameID).update("started", true);
             Log.d("ROOM", roomID);
         }
         conigureViews();
         seatPlayers();
-
     }
 
 
@@ -63,7 +66,6 @@ public class Game extends AppCompatActivity {
                         Player player = new Player(document.getString("player_name"),
                                 Math.toIntExact(document.getLong("player_chips")), document.getString("player_id"));
                         playersList.add(player);
-
                     }
                 }
 
