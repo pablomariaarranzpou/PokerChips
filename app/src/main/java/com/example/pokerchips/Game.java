@@ -76,9 +76,10 @@ public class Game extends AppCompatActivity {
             @Override
             public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
                 if(turn_ended){
-                    turn++;
+                    turn_ended = false;
                     setTurn(turn);
                 }
+
             }
         });
     }
@@ -144,7 +145,7 @@ public class Game extends AppCompatActivity {
     }
 
     public void setTurn(int seat){
-        turn_ended = false;
+        turn ++;
         Log.d("Modulo", String.valueOf(seat)+" % "+ String.valueOf(numPlayers));
         int a = seat % numPlayers;
 
@@ -152,8 +153,9 @@ public class Game extends AppCompatActivity {
             @SuppressLint("SetTextI18n")
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                turno.setText("Turno de "+playersList.get(a).getUsername());
-                if(mAuth.getCurrentUser().getUid().equals(playersList.get(a).getPlayer_id())){
+                turno.setText("Turno de " + playersList.get(a).getUsername());
+                if(mAuth.getCurrentUser().getUid().equals(playersList.get(a).getPlayer_id())) {
+                    turn_ended = false;
                     yourTurn();
                 }
             }
@@ -162,7 +164,6 @@ public class Game extends AppCompatActivity {
     }
 
     public void endOfTurn(){
-        turn += 1;
         setTurn(turn);
     }
     public void startGame(){
