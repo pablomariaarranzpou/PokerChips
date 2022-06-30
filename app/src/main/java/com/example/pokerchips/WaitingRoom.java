@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.opengl.Visibility;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
@@ -122,19 +123,18 @@ public class WaitingRoom extends AppCompatActivity {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         if(documentSnapshot.getLong("inPlayers") == documentSnapshot.getLong("numPlayers")){
+                            loadingView.setVisibility(View.INVISIBLE);
+                            textoEsperando.setText("Empezando partida...");
+                            (new Handler()).postDelayed(this::startGame, 5000);
+                        }
+                    }
+
+                    private void startGame() {
                             Intent in = new Intent(WaitingRoom.this, Game.class);
-                            loadingView.setVisibility(View.GONE);
-                            textoEsperando.setText("Starting...");
                             in.putExtra("roomID", roomID);
                             in.putExtra("gameID", gameID);
-                            try {
-                                Thread.sleep(5000);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
                             startActivity(in);
                             finish();
-                        }
                     }
                 });
             }

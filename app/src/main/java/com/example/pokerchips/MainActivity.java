@@ -21,6 +21,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
+import adapters.DatabaseAdapter;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,12 +30,14 @@ public class MainActivity extends AppCompatActivity {
     TextInputEditText user_name, room_code;
     FirebaseFirestore firestore;
     FirebaseAuth mAuth;
+    DatabaseAdapter da;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         firestore = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        mAuth.signInAnonymously();
         btn_createRoom = findViewById(R.id.create_menu);
         btn_joinRoom = findViewById(R.id.join_menu);
         user_name = findViewById(R.id.edituser);
@@ -71,9 +75,12 @@ public class MainActivity extends AppCompatActivity {
                                         room_code.setError("SALA LLENA");
                                         room_code.requestFocus();
                                         return;
-                                    } doc.update("inPlayers", inPlayers).addOnSuccessListener((OnSuccessListener<? super Void>) task1 -> {
+                                    }
+                                    Log.d("inPlayers","VA A ACTUALIZAR IN PLAYERS");
+                                    doc.update("inPlayers", inPlayers).addOnSuccessListener((OnSuccessListener<? super Void>) task1 -> {
                                         Intent in = new Intent(MainActivity.this, WaitingRoom.class);
                                         in.putExtra("roomID", doc.getId());
+                                        Log.d("LLEGA", "ACTUALIZA_IN_PLAYERS");
                                         doc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                             @Override
                                             public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -101,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
                                     return;
                                 }
                             } else {
-                                room_code.setError("NO EXISTE");
+                                room_code.setError("ERROR");
                                 room_code.requestFocus();
                                 return;
                             }

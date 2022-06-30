@@ -1,18 +1,28 @@
 package com.example.pokerchips;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.PersistableBundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -26,30 +36,51 @@ public class Game extends AppCompatActivity {
     private String userID, roomID, gameID;
     private TextView seat1, seat2, seat3, seat4, seat5, seat6, seat7, seat8;
     private TextView chips1, chips2, chips3, chips4, chips5, chips6, chips7, chips8;
+    private TextView myChips;
+    private EditText mybet;
+    private TextView turno;
+    private int turn = 0, numPlayers;
     private ArrayList<Player> playersList;
     private ArrayList<TextView> seatsViews;
     private ArrayList<TextView> chipsView;
+    private Button btn_apostar, btn_abandonar, btn_pasar;
+    private boolean turn_ended = false;
+
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)  {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         firestore = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         userID = mAuth.getCurrentUser().getUid();
+        turno = findViewById(R.id.turn_txt);
         seatsViews = new ArrayList<TextView>();
         chipsView = new ArrayList<TextView>();
         userID = mAuth.getCurrentUser().getUid();
 
 
-        if (getIntent().hasExtra("roomID") && getIntent().hasExtra("gameID")){
+        if (getIntent().hasExtra("roomID") && getIntent().hasExtra("gameID")) {
             this.roomID = getIntent().getExtras().getString("roomID");
             this.gameID = getIntent().getExtras().getString("gameID");
-            firestore.collection("Game").document(gameID).update("started", true);
+            firestore.collection("Game").document(gameID).update("started", true).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    conigureViews();
+                }
+            });
             Log.d("ROOM", roomID);
         }
-        conigureViews();
-        seatPlayers();
+
+        firestore.collection("Game").document(gameID).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                if(turn_ended){
+                    turn++;
+                    setTurn(turn);
+                }
+            }
+        });
     }
 
 
@@ -69,6 +100,7 @@ public class Game extends AppCompatActivity {
                     }
                 }
 
+
                 for (int i = 0; i < playersList.size() ; i++) {
                     Player act = playersList.get(i);
                     if(mAuth.getCurrentUser().getUid().equals(act.getPlayer_id())){
@@ -82,17 +114,85 @@ public class Game extends AppCompatActivity {
                         text = chipsView.get(i);
                         text.setText(act.getUserChipstoString());
                     }
+
                 }
+
                 for (int i = playersList.size(); i < 8; i++) {
                     TextView text = seatsViews.get(i);
                     text.setText("");
                     text = chipsView.get(i);
                     text.setText("");
                 }
+
+            firestore.collection("Room").document(roomID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    myChips = findViewById(R.id.poker_chips_usertxt);
+                    myChips.setText((String.valueOf(Math.toIntExact(task.getResult().getLong("numChips")))));
+                    numPlayers = Math.toIntExact(task.getResult().getLong("inPlayers"));
+                    startGame();
+                }
+            });
+
+            }
+        });
+
+
+
+
+
+    }
+
+    public void setTurn(int seat){
+        turn_ended = false;
+        Log.d("Modulo", String.valueOf(seat)+" % "+ String.valueOf(numPlayers));
+        int a = seat % numPlayers;
+
+        firestore.collection("Game").document(gameID).update("playerTurn", playersList.get(a).getPlayer_id()).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                turno.setText("Turno de "+playersList.get(a).getUsername());
+                if(mAuth.getCurrentUser().getUid().equals(playersList.get(a).getPlayer_id())){
+                    yourTurn();
+                }
+            }
+        });
+
+    }
+
+    public void endOfTurn(){
+        turn += 1;
+        setTurn(turn);
+    }
+    public void startGame(){
+        setTurn(turn);
+    }
+    private void yourTurn() {
+        btn_pasar.setEnabled(true);
+        btn_abandonar.setEnabled(true);
+        btn_apostar.setEnabled(true);
+
+        btn_apostar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btn_pasar.setEnabled(false);
+                btn_abandonar.setEnabled(false);
+                btn_apostar.setEnabled(false);
+                turn_ended = true;
+                endOfTurn();
             }
         });
     }
 
+    public void roundManager() {
+
+    }
+
+    public void betting(){
+
+
+    }
     public void conigureViews(){
 
         seat1 = findViewById(R.id.SEAT_1_NAME);
@@ -127,7 +227,17 @@ public class Game extends AppCompatActivity {
         chipsView.add(chips6);
         chipsView.add(chips7);
         chipsView.add(chips8);
+        btn_apostar = findViewById(R.id.btn_apostar);
+        btn_abandonar = findViewById(R.id.btn_abandonar);
+        btn_pasar = findViewById(R.id.btn_pasar);
+        btn_pasar.setEnabled(false);
+        btn_abandonar.setEnabled(false);
+        btn_apostar.setEnabled(false);
+        mybet = findViewById(R.id.poker_chips_bet);
+        seatPlayers();
     }
+
+
 
 
 
