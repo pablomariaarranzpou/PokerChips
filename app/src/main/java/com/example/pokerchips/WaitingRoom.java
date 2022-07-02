@@ -1,17 +1,11 @@
 package com.example.pokerchips;
 
-import android.annotation.SuppressLint;
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -20,27 +14,18 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.MetadataChanges;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import adapters.PlayersAdapter;
-import adapters.PlayersViewHolder;
 import adapters.PlayersViewModel;
 import adapters.PlayersViewmodel_Factory;
 import model.Player;
@@ -125,7 +110,8 @@ public class WaitingRoom extends AppCompatActivity {
                         if(documentSnapshot.getLong("inPlayers") == documentSnapshot.getLong("numPlayers")){
                             loadingView.setVisibility(View.INVISIBLE);
                             textoEsperando.setText("Empezando partida...");
-                            (new Handler()).postDelayed(this::startGame, 5000);
+                            (new Handler()).postDelayed(this::startGame, 2500);
+                            startGame();
                         }
                     }
 

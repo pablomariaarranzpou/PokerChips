@@ -2,9 +2,6 @@ package com.example.pokerchips;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.PersistableBundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -45,6 +42,10 @@ public class Game extends AppCompatActivity {
     private ArrayList<TextView> chipsView;
     private Button btn_apostar, btn_abandonar, btn_pasar;
     private boolean turn_ended = false;
+    private boolean not_turn = false;
+    private boolean gameStarted = false;
+
+    private String turnID;
 
 
     @Override
@@ -58,32 +59,91 @@ public class Game extends AppCompatActivity {
         seatsViews = new ArrayList<TextView>();
         chipsView = new ArrayList<TextView>();
         userID = mAuth.getCurrentUser().getUid();
+        turnID = "nsajdbjasbjdbajs";
+
 
 
         if (getIntent().hasExtra("roomID") && getIntent().hasExtra("gameID")) {
             this.roomID = getIntent().getExtras().getString("roomID");
             this.gameID = getIntent().getExtras().getString("gameID");
-            firestore.collection("Game").document(gameID).update("started", true).addOnCompleteListener(new OnCompleteListener<Void>() {
+            firestore.collection("Game").document(gameID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    conigureViews();
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    if(!documentSnapshot.getBoolean("started")){
+                        firestore.collection("Game").document(gameID).update("started", true).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                conigureViews();
+                            }
+                        });
+                    }else{
+                        conigureViews();
+                    }
                 }
+
+
             });
             Log.d("ROOM", roomID);
         }
 
+
+    }
+
+
+    public void addEventTurnUpdate(){
         firestore.collection("Game").document(gameID).addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                if(turn_ended){
-                    turn_ended = false;
-                    setTurn(turn);
+                if(!value.getString("playerTurn").equals(turnID) && value.exists()){
+                    if(turn_ended){
+                        turn_ended = false;
+                        setTurn();
+                    }
                 }
 
             }
         });
     }
 
+    public void setTurn(){
+        turn++;
+        Log.d("Modulo", String.valueOf(turn) + " % " + String.valueOf(numPlayers));
+        int a = turn % numPlayers;
+        turnID = playersList.get(a).getPlayer_id();
+
+        firestore.collection("Game").document(gameID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+
+                String turn_actual = documentSnapshot.getString("playerTurn");
+                Log.d("TURNO?", turn_actual + " es igual a " + turnID + " ??");
+                if (turn_actual.equals(turnID)) {
+                    turno.setText("Turno de " + playersList.get(a).getUsername());
+                    turnID = turn_actual;
+                    if (mAuth.getCurrentUser().getUid().equals(turnID)) {
+                        yourTurn();
+                    }
+                } else {
+                    firestore.collection("Game").document(gameID).update("playerTurn", playersList.get(a)
+                            .getPlayer_id()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @SuppressLint("SetTextI18n")
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            turno.setText("Turno de " + playersList.get(a).getUsername());
+                            turnID = playersList.get(a).getPlayer_id();
+                            if (mAuth.getCurrentUser().getUid().equals(turnID)){
+                                yourTurn();
+                            }
+                        }
+                    });
+                }
+
+            }
+        });
+
+
+
+    }
 
     public void seatPlayers(){
 
@@ -131,43 +191,32 @@ public class Game extends AppCompatActivity {
                     myChips = findViewById(R.id.poker_chips_usertxt);
                     myChips.setText((String.valueOf(Math.toIntExact(task.getResult().getLong("numChips")))));
                     numPlayers = Math.toIntExact(task.getResult().getLong("inPlayers"));
-                    startGame();
+                    firestore.collection("Game").document(gameID).update("playerTurn", playersList.get(0).getPlayer_id()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            firestore.collection("Game").document(gameID).update("intTurn", 0).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    startGame();
+                                }
+                            });
+                        }
+                    });
+
                 }
             });
 
             }
         });
-
-
-
-
-
     }
 
-    public void setTurn(int seat){
-        turn ++;
-        Log.d("Modulo", String.valueOf(seat)+" % "+ String.valueOf(numPlayers));
-        int a = seat % numPlayers;
-
-        firestore.collection("Game").document(gameID).update("playerTurn", playersList.get(a).getPlayer_id()).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                turno.setText("Turno de " + playersList.get(a).getUsername());
-                if(mAuth.getCurrentUser().getUid().equals(playersList.get(a).getPlayer_id())) {
-                    turn_ended = false;
-                    yourTurn();
-                }
-            }
-        });
-
-    }
 
     public void endOfTurn(){
-        setTurn(turn);
+        setTurn();
     }
     public void startGame(){
-        setTurn(turn);
+        addEventTurnUpdate();
+        setTurn();
     }
     private void yourTurn() {
         btn_pasar.setEnabled(true);
@@ -181,6 +230,7 @@ public class Game extends AppCompatActivity {
                 btn_abandonar.setEnabled(false);
                 btn_apostar.setEnabled(false);
                 turn_ended = true;
+                not_turn = true;
                 endOfTurn();
             }
         });
